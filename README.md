@@ -1,2 +1,2 @@
-# mazegenerator_perlindijkstra
-Procedural Maze Generator using Dijkstra's Algorithm to navigate a graph weighted by Perlin Noise 
+# mazegenerator_astar
+Procedural Maze Generator using the A* Search Algorithm to navigate a graph of random weights
