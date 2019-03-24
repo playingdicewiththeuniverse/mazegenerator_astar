@@ -1,11 +1,11 @@
 // Graph class contains a set of vertices
 class Graph {
-  int size, stackTopIndex;
-  Vertex[] nodes;
-  IntList stack;
-  float dMin, dMax;
+  int       size, stackTopIndex;
+  Vertex[]  nodes;
+  IntList   stack;
+  float     dMin, dMax;
   FloatList distances;
-  
+  int       finalFrame;
 
   Graph( int _size ) {
     this.size = _size;
@@ -14,6 +14,7 @@ class Graph {
     this.dMin = 0;
     this.dMax = 0;
     this.distances = new FloatList();
+    this.finalFrame = MAX_INT;
   }
 
 
@@ -44,28 +45,32 @@ class Graph {
       }
     }
     
-    // set this vertex to current and remove from the open list
-    this.stackTopIndex = this.stack.get(bestOpenIndex);
-    this.stack.remove(bestOpenIndex);
+    if( bestOpenIndex > -1 ){
+      // set this vertex to current and remove from the open list
+      this.stackTopIndex = this.stack.get(bestOpenIndex);
+      this.stack.remove(bestOpenIndex);
 
-    Vertex currentVertex = this.nodes[this.stackTopIndex];
-    float currentVertexDistance = currentVertex.distance; 
+      Vertex currentVertex = this.nodes[this.stackTopIndex];
+      float currentVertexDistance = currentVertex.distance; 
 
-    // add this distance into the final values
-    this.distances.append(currentVertexDistance);
-    
-    // get all open neighbors of this vertex  
-    IntList currentVertexNeighbors = this.getOpenNeighbors( this.stackTopIndex );
-    
-    for( int i = 0; i < currentVertexNeighbors.size(); i++ ){
-      int neighborIndex          = currentVertexNeighbors.get(i);
-      Vertex neighborVertex      = this.nodes[ neighborIndex ];
-      float  neighborDistanceOld = neighborVertex.distance;
-      float  neighborDistanceNew = currentVertexDistance + DISTANCE_COST + ( HILL_COST * abs( currentVertex.altitude - neighborVertex.altitude ) );
-      if( neighborDistanceNew < neighborDistanceOld ){
-        this.nodes[ neighborIndex ].edgeIndex = this.stackTopIndex;
-        this.nodes[ neighborIndex ].distance = neighborDistanceNew;
+      // add this distance into the final values
+      this.distances.append(currentVertexDistance);
+      
+      // get all open neighbors of this vertex  
+      IntList currentVertexNeighbors = this.getOpenNeighbors( this.stackTopIndex );
+      
+      for( int i = 0; i < currentVertexNeighbors.size(); i++ ){
+        int neighborIndex          = currentVertexNeighbors.get(i);
+        Vertex neighborVertex      = this.nodes[ neighborIndex ];
+        float  neighborDistanceOld = neighborVertex.distance;
+        float  neighborDistanceNew = currentVertexDistance + DISTANCE_COST + ( HILL_COST * abs( currentVertex.altitude - neighborVertex.altitude ) );
+        if( neighborDistanceNew < neighborDistanceOld ){
+          this.nodes[ neighborIndex ].edgeIndex = this.stackTopIndex;
+          this.nodes[ neighborIndex ].distance = neighborDistanceNew;
+        }
       }
+    }else{
+      this.finalFrame = min( this.finalFrame, frameCount + 60 );
     }
 
     this.dMin = this.distances.min();
@@ -82,25 +87,30 @@ class Graph {
     for( int i = 0; i < this.size; i++ ){
       Vertex node = this.nodes[i];
 
-      if( node.edgeIndex > -1 ){
-        if( this.stackTopIndex == i && this.stack.size() > 0 ){
-          fill( HEAD_CLR );  // this node is the top of the stack
+      if( node.edgeIndex > -1 && renderMode != -1 ){
+        if( false && this.stackTopIndex == i && this.stack.size() > 0 ){
+          fill( HEAD_CLR );  // this node is the top of the stack\
+
         }else if( this.stack.hasValue( i ) ){
           fill( OPEN_CLR ); // this node is still in the stack
+
         }else if( renderMode == 1 ){
           int val = (int)map( node.distance, dMax, dMin, 0, 715 ) + 50;
           int r = constrain( val, 0, 255 );
           int g = constrain( val-255, 0, 255 );
           int b = constrain( val-510, 0, 255 );
           fill( r, g, b );
+
         }else if( renderMode == 2 ){
           int val = (int)map( node.distance, dMax, dMin, 715, 0 ) + 50;
           int r = constrain( val, 0, 255 );
           int g = constrain( val-255, 0, 255 );
           int b = constrain( val-510, 0, 255 );
           fill( r, g, b );
+
         }else{
           fill( FILL_CLR ); // this node's path has been determined
+          
         }
 
         // draw vertex

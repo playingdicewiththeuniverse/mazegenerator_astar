@@ -35,12 +35,15 @@ void setup() {
 
 
 void draw() {
+
   g.update();
   g.render(1);
 
-  // save this frame if recording is set
-  if( RECORD ) saveFrame("output/frame-####.png");
-  
-  // stop if everything is checked
-  if( g.stack.size() == 0 ) noLoop();
+  if( RECORD )
+    saveFrame("output/frame-####.png");
+  if( g.finalFrame <= frameCount ){
+    println("Done");
+    noLoop();
+  }
+
 }
